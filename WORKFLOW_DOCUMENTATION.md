@@ -859,6 +859,74 @@ CVC: 123 (or any 3 digits)
 ZIP: 12345 (or any value)
 ```
 
+**Admin Access:**
+```
+URL: http://127.0.0.1:8000/admin/
+Username: admin
+Password: admin
+Email: admin@example.com
+```
+
+### Creating Admin Account (First Time Setup)
+
+If admin account doesn't exist, create it:
+
+```bash
+python manage.py createsuperuser
+# Follow prompts:
+# Username: admin
+# Email: admin@example.com
+# Password: (enter secure password)
+# Confirm password: (repeat)
+```
+
+### Admin Dashboard Features
+
+Once logged in at `/admin/`, you can:
+
+**User Management**
+- View all registered users
+- Suspend/reactivate user accounts
+- View user activity and login history
+- Edit user profiles and permissions
+- Reset user passwords
+- Delete user accounts
+
+**Monitor Oversight**
+- View ALL monitors across the platform
+- Check monitor status (active, paused, expired)
+- View monitor activity logs
+- See last check timestamp for each monitor
+- Filter monitors by user, URL, keyword, status
+
+**Subscription Analytics**
+- View all active subscriptions
+- See subscription expiration dates
+- Track plan distribution (Standard vs Discovery)
+- View churn rate and expiring subscriptions
+- Generate revenue reports
+
+**Payment Management**
+- View all payment transactions
+- Check payment status (completed, failed, pending)
+- See Stripe transaction IDs
+- Mark failed payments as recovered
+- Process refunds
+- Generate payment reports by date range
+
+**System Health & Logs**
+- View error logs from check_monitoring runs
+- See failed email delivery logs
+- Check scheduled task execution status
+- Monitor system performance metrics
+- View database statistics
+
+**Audit Trail**
+- See all admin actions with timestamps
+- Track subscription changes
+- View payment modifications
+- Access comprehensive activity logs
+
 ### Quick 5-Minute Test
 
 1. **Start Server**
