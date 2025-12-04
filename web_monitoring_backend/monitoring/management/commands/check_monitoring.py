@@ -69,24 +69,21 @@ class Command(BaseCommand):
         warned_expiring = 0
         
         for monitor in monitors:
-            # CHECK 1: Verify subscription exists and is active
-            subscription = Subscription.objects.filter(monitor=monitor).first()
+            # CHECK 1: Verify subscription exists and is active for this user
+            subscription = Subscription.objects.filter(
+                user=monitor.user,
+                status='active'
+            ).first()
             
             if not subscription:
-                logger.warning(f"Monitor {monitor.id} has no subscription. Skipping.")
-                self.stdout.write(self.style.WARNING(f"  Monitor {monitor.id}: No subscription found"))
-                skipped_expired += 1
-                continue
-            
-            if subscription.status != 'active':
-                logger.info(f"Monitor {monitor.id} subscription is {subscription.status}. Skipping.")
-                self.stdout.write(self.style.WARNING(f"  Monitor {monitor.id}: Subscription not active ({subscription.status})"))
+                logger.warning(f"Monitor {monitor.id} has no active subscription. Skipping.")
+                self.stdout.write(self.style.WARNING(f"  Monitor {monitor.id}: No active subscription found"))
                 skipped_expired += 1
                 continue
             
             # CHECK 2: Check if subscription has expired
             now = timezone.now()
-            if subscription.expires_at < now:
+            if subscription.expires_at and subscription.expires_at < now:
                 logger.info(f"Monitor {monitor.id} subscription expired on {subscription.expires_at}. Stopping monitoring.")
                 self.stdout.write(self.style.ERROR(f"  Monitor {monitor.id}: Subscription EXPIRED on {subscription.expires_at}. Stopping checks."))
                 
@@ -94,10 +91,13 @@ class Command(BaseCommand):
                 monitor.status = 'paused'
                 monitor.save()
                 
+                # Update subscription status to expired
+                subscription.status = 'expired'
+                subscription.save()
+                
                 # Create notification
                 Notification.objects.create(
                     user=monitor.user,
-                    monitor=monitor,
                     notification_type='subscription_expired',
                     status='sent',
                     recipient_email=monitor.user.email,
@@ -109,7 +109,7 @@ class Command(BaseCommand):
                 continue
             
             # CHECK 3: Send warning email if subscription expires in 7 days
-            days_until_expiry = (subscription.expires_at - now).days
+            days_until_expiry = (subscription.expires_at - now).days if subscription.expires_at else -1
             if days_until_expiry == 7:
                 logger.info(f"Subscription {subscription.id} expires in 7 days. Sending warning.")
                 self.stdout.write(self.style.WARNING(f"  Monitor {monitor.id}: Subscription expires in 7 days. Sending warning email."))

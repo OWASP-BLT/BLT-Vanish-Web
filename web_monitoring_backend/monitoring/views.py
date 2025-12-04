@@ -87,9 +87,44 @@ class MonitorDetailView(LoginRequiredMixin, DetailView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['check_results'] = CheckResult.objects.filter(
+        
+        # Get all check results for this monitor
+        all_check_results = CheckResult.objects.filter(
             monitor=self.object
-        ).order_by('-checked_at')[:50]
+        ).order_by('-checked_at')
+        
+        # Calculate statistics
+        total_checks = all_check_results.count()
+        keyword_found_count = all_check_results.filter(keyword_found=True).count()
+        keyword_not_found_count = all_check_results.filter(keyword_found=False).count()
+        
+        # Success rate
+        success_rate = 0
+        if total_checks > 0:
+            success_rate = round((keyword_found_count / total_checks) * 100, 1)
+        
+        # Get recent check results (last 50)
+        recent_check_results = all_check_results[:50]
+        
+        # Get subscription for this monitor
+        subscription = Subscription.objects.filter(
+            user=self.object.user,
+            status='active'
+        ).first()
+        
+        # Add to context
+        context['check_results'] = recent_check_results
+        context['total_checks'] = total_checks
+        context['keyword_found_count'] = keyword_found_count
+        context['keyword_not_found_count'] = keyword_not_found_count
+        context['success_rate'] = success_rate
+        context['subscription'] = subscription
+        
+        # Get found instances (for detailed view)
+        context['found_instances'] = all_check_results.filter(
+            keyword_found=True
+        ).order_by('-checked_at')[:100]
+        
         return context
 
 
