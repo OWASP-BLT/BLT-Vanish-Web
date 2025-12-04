@@ -1,0 +1,2 @@
+# Heroku runtime specification
+python-3.11.0
