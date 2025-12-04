@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment History - SelfErase{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">💳 Payment History</h1>
+            
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Spent</h5>
+                            <h3>${{ total_spent }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Completed</h5>
+                            <h3>{{ completed_count }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Pending</h5>
+                            <h3>{{ pending_count }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Failed</h5>
+                            <h3>{{ failed_count }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payments Table -->
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Payment Transactions</h5>
+                </div>
+                <div class="card-body">
+                    {% if payments %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Subscription</th>
+                                        <th>Status</th>
+                                        <th>Payment Intent ID</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for payment in payments %}
+                                        <tr>
+                                            <td>
+                                                <small>{{ payment.created_at|date:"M d, Y H:i" }}</small>
+                                            </td>
+                                            <td>
+                                                <strong>${{ payment.amount }}</strong>
+                                            </td>
+                                            <td>
+                                                {% if payment.subscription %}
+                                                    <span class="badge bg-info">
+                                                        {{ payment.subscription.plan_type|upper }}
+                                                    </span>
+                                                    <br>
+                                                    <small>Sub ID: {{ payment.subscription.id }}</small>
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if payment.status == 'completed' %}
+                                                    <span class="badge bg-success">✓ Completed</span>
+                                                {% elif payment.status == 'pending' %}
+                                                    <span class="badge bg-warning">⏳ Pending</span>
+                                                {% elif payment.status == 'failed' %}
+                                                    <span class="badge bg-danger">✗ Failed</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">{{ payment.status|upper }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <small class="text-monospace">
+                                                    {% if payment.payment_intent_id %}
+                                                        {{ payment.payment_intent_id|truncatewords:2 }}
+                                                    {% else %}
+                                                        <span class="text-muted">N/A</span>
+                                                    {% endif %}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#paymentDetailModal{{ payment.id }}">
+                                                    View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if is_paginated %}
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1">First</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                                        </li>
+                                    {% endif %}
+
+                                    <li class="page-item active">
+                                        <span class="page-link">
+                                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                        </span>
+                                    </li>
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            <h5>No payments yet</h5>
+                            <p>You haven't made any payments. <a href="{% url 'web_monitoring:subscriptions' %}">Subscribe to a plan</a> to get started.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Back Button -->
+            <div class="mt-4">
+                <a href="{% url 'web_monitoring:subscriptions' %}" class="btn btn-secondary">
+                    ← Back to Subscriptions
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Detail Modals -->
+{% for payment in payments %}
+    <div class="modal fade" id="paymentDetailModal{{ payment.id }}" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Payment Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Date</h6>
+                            <p>{{ payment.created_at|date:"F d, Y \a\t H:i:s" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Amount</h6>
+                            <p class="h4">${{ payment.amount }}</p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Status</h6>
+                            <p>
+                                {% if payment.status == 'completed' %}
+                                    <span class="badge bg-success">✓ Completed</span>
+                                {% elif payment.status == 'pending' %}
+                                    <span class="badge bg-warning">⏳ Pending</span>
+                                {% elif payment.status == 'failed' %}
+                                    <span class="badge bg-danger">✗ Failed</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Subscription</h6>
+                            <p>
+                                {% if payment.subscription %}
+                                    {{ payment.subscription.plan_type|upper }}
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <h6 class="text-muted">Payment Intent ID</h6>
+                    <p class="text-monospace font-monospace">
+                        {% if payment.payment_intent_id %}
+                            {{ payment.payment_intent_id }}
+                        {% else %}
+                            <span class="text-muted">Not available</span>
+                        {% endif %}
+                    </p>
+
+                    <hr>
+
+                    <h6 class="text-muted">Payment ID</h6>
+                    <p class="text-monospace">{{ payment.id }}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+<style>
+    .text-monospace {
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}

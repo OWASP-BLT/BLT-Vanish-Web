@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Logged Out - SelfErase{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body text-center py-5">
+                    <div class="mb-4">
+                        <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+                    </div>
+                    <h2 class="card-title mb-3">Logged Out Successfully</h2>
+                    <p class="text-muted mb-4">
+                        You have been successfully logged out of your SelfErase account.
+                    </p>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'web_accounts:login' %}" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right"></i> Log In Again
+                        </a>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'web_accounts:register' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-person-plus"></i> Create New Account
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-info mt-3" role="alert">
+                <i class="bi bi-info-circle"></i>
+                <strong>Tip:</strong> Your data is safe. Log back in anytime to continue monitoring.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
