@@ -17,6 +17,8 @@ from django.core.mail import send_mail
 from django.conf import settings
 from monitoring.models import Monitor, CheckResult, Notification
 from accounts.models import Subscription
+from monitoring.email_service import send_subscription_expiring_email
+from datetime import timedelta
 import requests
 from bs4 import BeautifulSoup
 import logging
@@ -63,8 +65,62 @@ class Command(BaseCommand):
         checked_count = 0
         keyword_found_count = 0
         error_count = 0
+        skipped_expired = 0
+        warned_expiring = 0
         
         for monitor in monitors:
+            # CHECK 1: Verify subscription exists and is active
+            subscription = Subscription.objects.filter(monitor=monitor).first()
+            
+            if not subscription:
+                logger.warning(f"Monitor {monitor.id} has no subscription. Skipping.")
+                self.stdout.write(self.style.WARNING(f"  Monitor {monitor.id}: No subscription found"))
+                skipped_expired += 1
+                continue
+            
+            if subscription.status != 'active':
+                logger.info(f"Monitor {monitor.id} subscription is {subscription.status}. Skipping.")
+                self.stdout.write(self.style.WARNING(f"  Monitor {monitor.id}: Subscription not active ({subscription.status})"))
+                skipped_expired += 1
+                continue
+            
+            # CHECK 2: Check if subscription has expired
+            now = timezone.now()
+            if subscription.expires_at < now:
+                logger.info(f"Monitor {monitor.id} subscription expired on {subscription.expires_at}. Stopping monitoring.")
+                self.stdout.write(self.style.ERROR(f"  Monitor {monitor.id}: Subscription EXPIRED on {subscription.expires_at}. Stopping checks."))
+                
+                # Pause the monitor
+                monitor.status = 'paused'
+                monitor.save()
+                
+                # Create notification
+                Notification.objects.create(
+                    user=monitor.user,
+                    monitor=monitor,
+                    notification_type='subscription_expired',
+                    status='sent',
+                    recipient_email=monitor.user.email,
+                    subject=f'Subscription Expired: {monitor.url}',
+                    message=f'Your subscription for monitoring {monitor.url} has expired. Please renew to continue monitoring.'
+                )
+                
+                skipped_expired += 1
+                continue
+            
+            # CHECK 3: Send warning email if subscription expires in 7 days
+            days_until_expiry = (subscription.expires_at - now).days
+            if days_until_expiry == 7:
+                logger.info(f"Subscription {subscription.id} expires in 7 days. Sending warning.")
+                self.stdout.write(self.style.WARNING(f"  Monitor {monitor.id}: Subscription expires in 7 days. Sending warning email."))
+                
+                try:
+                    send_subscription_expiring_email(subscription)
+                    warned_expiring += 1
+                except Exception as e:
+                    logger.error(f"Error sending expiration warning for subscription {subscription.id}: {str(e)}")
+            
+            # NOW RUN THE CHECK (only if subscription is active and not expired)
             try:
                 result = self.check_monitor(monitor)
                 checked_count += 1
@@ -115,6 +171,18 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.ERROR(
                     f'✗ Errors: {error_count}'
+                )
+            )
+        if skipped_expired > 0:
+            self.stdout.write(
+                self.style.ERROR(
+                    f'⏸ Skipped (expired/inactive): {skipped_expired}'
+                )
+            )
+        if warned_expiring > 0:
+            self.stdout.write(
+                self.style.WARNING(
+                    f'⏰ Expiration warnings sent: {warned_expiring}'
                 )
             )
         self.stdout.write(
