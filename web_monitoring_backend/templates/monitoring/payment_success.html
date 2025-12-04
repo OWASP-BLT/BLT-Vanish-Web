@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Successful - SelfErase{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            {% if not error %}
+            <div class="card border-success mt-5">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-check-circle"></i> Payment Successful
+                    </h5>
+                </div>
+                <div class="card-body text-center py-5">
+                    <div style="font-size: 3rem; color: #28a745; margin-bottom: 20px;">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+
+                    <h3 class="mb-3">Thank you for your payment!</h3>
+
+                    {% if payment %}
+                    <div class="alert alert-light border mb-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong>Amount:</strong><br>
+                                    <span class="text-success h5">${{ payment.amount }}</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong>Transaction ID:</strong><br>
+                                    <code class="small">{{ payment.transaction_id }}</code>
+                                </p>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-0">
+                                    <strong>Subscription:</strong><br>
+                                    <small>{{ payment.subscription.keyword }}</small>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-0">
+                                    <strong>Date:</strong><br>
+                                    <small>{{ payment.created_at|date:"M d, Y H:i" }}</small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="text-muted mb-4">
+                        A confirmation email has been sent to <strong>{{ user.email }}</strong>
+                    </p>
+                    {% endif %}
+
+                    <div class="d-grid gap-2">
+                        {% if monitor %}
+                        <form method="post" style="width: 100%;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-lg w-100">
+                                <i class="bi bi-arrow-left"></i> Back to Monitor Details
+                            </button>
+                        </form>
+                        {% else %}
+                        <a href="{% url 'web_monitoring:monitor_list' %}" class="btn btn-success btn-lg">
+                            <i class="bi bi-arrow-left"></i> Back to Monitors
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'web_monitoring:payment_history' %}" class="btn btn-outline-success">
+                            <i class="bi bi-receipt"></i> View Payment History
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">What's Next?</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <strong><i class="bi bi-check"></i> Subscription Active</strong>
+                            <p class="text-muted small mb-0">Your subscription is now active and monitoring will begin immediately.</p>
+                        </li>
+                        <li class="mb-3">
+                            <strong><i class="bi bi-bell"></i> Configure Alerts</strong>
+                            <p class="text-muted small mb-0">Go to your subscription settings to enable email and SMS alerts.</p>
+                        </li>
+                        <li>
+                            <strong><i class="bi bi-bar-chart"></i> Monitor Progress</strong>
+                            <p class="text-muted small mb-0">Visit the monitors page to see keyword detection results.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            {% else %}
+            <div class="card border-danger mt-5">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-circle"></i> Error
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ error }}</p>
+                    <a href="{% url 'web_monitoring:subscriptions' %}" class="btn btn-outline-danger">
+                        <i class="bi bi-arrow-left"></i> Back to Subscriptions
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

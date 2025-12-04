@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Pause Subscription - SelfErase{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-warning mt-5">
+                <div class="card-header bg-warning text-dark">
+                    <i class="bi bi-exclamation-triangle"></i> Pause Subscription
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">
+                        Are you sure you want to pause this subscription?
+                    </p>
+                    <p class="text-muted">
+                        <strong>Keyword:</strong> {{ object.keyword }}<br>
+                        <strong>Check Frequency:</strong> {{ object.get_check_frequency_display }}<br>
+                        <strong>Cost/Month:</strong> ${{ object.cost_per_month }}
+                    </p>
+                    <p class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        You can reactivate this subscription anytime from the subscriptions list.
+                    </p>
+
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-pause"></i> Pause Subscription
+                        </button>
+                        <a href="{% url 'web_monitoring:subscriptions' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

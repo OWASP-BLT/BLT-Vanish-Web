@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}Subscriptions - SelfErase{% endblock %}
+
+{% block content %}
+<div class="container-lg">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="bi bi-credit-card"></i> Subscriptions</h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'web_monitoring:subscription_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Subscription
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Card -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h5>Active Subscriptions</h5>
+                            <h2 class="text-success">{{ active_subscriptions|length }}</h2>
+                        </div>
+                        <div class="col-md-4">
+                            <h5>Monthly Cost</h5>
+                            <h2 class="text-primary">${{ total_monthly_cost }}</h2>
+                        </div>
+                        <div class="col-md-4">
+                            <h5>Paused/Cancelled</h5>
+                            <h2 class="text-warning">{{ inactive_subscriptions|length }}</h2>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="{% url 'web_monitoring:pricing_plans' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-tag"></i> View Plans
+                            </a>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <a href="{% url 'web_monitoring:payment_history' %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-receipt"></i> Payment History
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Subscriptions -->
+    {% if active_subscriptions %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h3>Active</h3>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Keyword</th>
+                            <th>Check Frequency</th>
+                            <th>Cost/Month</th>
+                            <th>Expires</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in active_subscriptions %}
+                        <tr>
+                            <td>{{ sub.keyword }}</td>
+                            <td><span class="badge bg-info">{{ sub.get_check_frequency_display }}</span></td>
+                            <td>${{ sub.cost_per_month }}</td>
+                            <td>
+                                {% if sub.expires_at %}
+                                    {{ sub.expires_at|date:"M d, Y" }}
+                                {% else %}
+                                    Never
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'web_monitoring:stripe_payment' sub.id %}" class="btn btn-sm btn-success" title="Pay now">
+                                    <i class="bi bi-credit-card"></i> Pay
+                                </a>
+                                <a href="{% url 'web_monitoring:subscription_update' sub.id %}" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                {% if user.is_staff %}
+                                    <a href="{% url 'web_monitoring:subscription_cancel' sub.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Pause this subscription?');">
+                                        <i class="bi bi-pause"></i> Pause
+                                    </a>
+                                    <a href="{% url 'web_monitoring:subscription_delete' sub.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this subscription?');">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-sm btn-danger" disabled title="Only admin can pause subscriptions">
+                                        <i class="bi bi-pause"></i> Pause
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" disabled title="Only admin can delete subscriptions">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Inactive Subscriptions -->
+    {% if inactive_subscriptions %}
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Inactive</h3>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Keyword</th>
+                            <th>Status</th>
+                            <th>Cost/Month</th>
+                            <th>Expires</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in inactive_subscriptions %}
+                        <tr>
+                            <td>{{ sub.keyword }}</td>
+                            <td><span class="badge badge-status-{{ sub.status }}">{{ sub.get_status_display }}</span></td>
+                            <td>${{ sub.cost_per_month }}</td>
+                            <td>
+                                {% if sub.expires_at %}
+                                    {{ sub.expires_at|date:"M d, Y" }}
+                                {% else %}
+                                    Never
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'web_monitoring:subscription_update' sub.id %}" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                {% if user.is_staff %}
+                                    <a href="{% url 'web_monitoring:subscription_delete' sub.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this subscription?');">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-sm btn-danger" disabled title="Only admin can delete subscriptions">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if not active_subscriptions and not inactive_subscriptions %}
+    <div class="alert alert-info" role="alert">
+        <i class="bi bi-info-circle"></i> You don't have any subscriptions yet.
+        <a href="{% url 'web_monitoring:subscription_create' %}" class="alert-link">Create one now</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment - SelfErase{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <!-- Step Indicator -->
+            <div class="card mb-4 bg-light">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="step-item completed">
+                                <div class="step-number">1</div>
+                                <div class="step-label">Create Monitor</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="step-item completed">
+                                <div class="step-number">2</div>
+                                <div class="step-label">Select Plan</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="step-item active">
+                                <div class="step-number">3</div>
+                                <div class="step-label">Payment</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <h2 class="card-title mb-4 text-center">
+                        <i class="bi bi-credit-card"></i> Complete Payment
+                    </h2>
+
+                    {% if error %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Error:</strong> {{ error }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+
+                    {% if subscription %}
+                        <form id="payment-form" method="post">
+                            {% csrf_token %}
+                            
+                            <!-- Payment Intent ID (hidden) -->
+                            <input type="hidden" name="payment_intent_id" id="payment_intent_id" value="{{ payment_intent_id }}">
+                            
+                            <!-- Order Summary -->
+                            <div class="card mb-4 bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Order Summary</h5>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-1"><strong>Subscription:</strong></p>
+                                            <p class="text-muted">{{ subscription.keyword }}</p>
+                                        </div>
+                                        <div class="col-md-6 text-md-end">
+                                            <p class="mb-1"><strong>Amount (Fixed):</strong></p>
+                                            <p class="h5 text-success" title="Amount is locked and cannot be changed">
+                                                <i class="fas fa-lock"></i> {{ amount_display }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-0"><strong>Total:</strong></p>
+                                        </div>
+                                        <div class="col-md-6 text-md-end">
+                                            <p class="mb-0 h6"><strong>{{ amount_display }}</strong></p>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted d-block mt-2">
+                                        <i class="fas fa-info-circle"></i> Your subscription will be activated after successful payment.
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Cardholder Information -->
+                            <div class="mb-3">
+                                <label for="cardholder_name" class="form-label">Cardholder Name</label>
+                                <input type="text" class="form-control" id="cardholder_name" name="cardholder_name" placeholder="John Doe" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ request.user.email }}" required>
+                            </div>
+
+                            <!-- Card Element -->
+                            <div class="mb-3">
+                                <label for="card-element" class="form-label">Card Details</label>
+                                <div id="card-element" class="form-control" style="height: 40px; padding-top: 10px;">
+                                    <!-- Stripe card element will go here -->
+                                </div>
+                                <div id="card-errors" class="text-danger mt-2" role="alert"></div>
+                            </div>
+
+                            <!-- Billing Address -->
+                            <hr>
+                            <h5 class="mb-3">Billing Address</h5>
+
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Street Address</label>
+                                <input type="text" class="form-control" id="address" name="address" placeholder="123 Main St" required>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="city" class="form-label">City</label>
+                                    <input type="text" class="form-control" id="city" name="city" placeholder="New York" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="state" class="form-label">State/Province</label>
+                                    <input type="text" class="form-control" id="state" name="state" placeholder="NY" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="postal_code" class="form-label">Postal Code</label>
+                                    <input type="text" class="form-control" id="postal_code" name="postal_code" placeholder="10001" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="country" class="form-label">Country</label>
+                                    <input type="text" class="form-control" id="country" name="country" placeholder="United States" required>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
+                                    <i class="bi bi-lock"></i> Pay ${{ subscription.cost_per_month }}
+                                </button>
+                            </div>
+
+                            <!-- Test Card Info -->
+                            <div class="alert alert-info mt-3" role="alert">
+                                <small>
+                                    <strong>Test Card:</strong> 4242 4242 4242 4242<br>
+                                    <strong>Exp Date:</strong> Any future date (e.g., 12/25)<br>
+                                    <strong>CVC:</strong> Any 3 digits (e.g., 123)
+                                </small>
+                            </div>
+                        </form>
+
+                        <div class="text-center mt-4">
+                            <a href="{% url 'web_monitoring:subscriptions' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Subscriptions
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-danger">
+                            Subscription not found. Please try again.
+                        </div>
+                        <div class="text-center">
+                            <a href="{% url 'web_monitoring:subscriptions' %}" class="btn btn-primary">
+                                <i class="bi bi-arrow-left"></i> Back to Subscriptions
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stripe.js -->
+<script src="https://js.stripe.com/v3/"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const stripe = Stripe('{{ stripe_public_key }}');
+    const elements = stripe.elements();
+    const cardElement = elements.create('card', {
+        style: {
+            base: {
+                fontSize: '16px',
+                color: '#424770',
+                '::placeholder': {
+                    color: '#aab7c4',
+                },
+            },
+            invalid: {
+                color: '#fa755a',
+                iconColor: '#fa755a',
+            },
+        }
+    });
+
+    cardElement.mount('#card-element');
+
+    // Handle real-time validation errors
+    cardElement.addEventListener('change', function(event) {
+        const displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+
+    // Handle form submission
+    const form = document.getElementById('payment-form');
+    const submitBtn = document.getElementById('submit-btn');
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Disable submit button
+        submitBtn.disabled = true;
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
+
+        // Get form values
+        const clientSecret = '{{ client_secret }}';
+        const billingDetails = {
+            name: document.getElementById('cardholder_name').value,
+            email: document.getElementById('email').value,
+            address: {
+                line1: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                state: document.getElementById('state').value,
+                postal_code: document.getElementById('postal_code').value,
+                country: document.getElementById('country').value,
+            }
+        };
+
+        // Confirm card payment
+        const result = await stripe.confirmCardPayment(clientSecret, {
+            payment_method: {
+                card: cardElement,
+                billing_details: billingDetails
+            }
+        });
+
+        if (result.error) {
+            // Show error
+            document.getElementById('card-errors').textContent = result.error.message;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        } else if (result.paymentIntent.status === 'succeeded') {
+            // Payment successful
+            document.getElementById('payment_intent_id').value = result.paymentIntent.id;
+            form.submit();
+        }
+    });
+});
+</script>
+
+<style>
+    .step-item {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .step-number {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        color: #666;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .step-item.active .step-number {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .step-item.completed .step-number {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .step-label {
+        font-weight: 500;
+        color: #666;
+    }
+</style>
+{% endblock %}

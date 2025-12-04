@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Monitors - SelfErase{% endblock %}
+
+{% block content %}
+<div class="container-lg">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="bi bi-list-check"></i> My Monitors</h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'web_monitoring:monitor_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Monitor
+            </a>
+        </div>
+    </div>
+
+    {% if monitors %}
+    <div class="row">
+        {% for monitor in monitors %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ monitor.keyword }}</h5>
+                    <span class="badge badge-status-{{ monitor.status }}">{{ monitor.get_status_display }}</span>
+                </div>
+                <div class="card-body">
+                    <p><strong>URL:</strong> <a href="{{ monitor.url }}" target="_blank" class="text-truncate">{{ monitor.url }}</a></p>
+                    <p><strong>Check Interval:</strong> Every {{ monitor.check_interval_days }} day{{ monitor.check_interval_days|pluralize }}</p>
+                    <p><strong>Last Checked:</strong> 
+                        {% if monitor.last_checked_time %}
+                            {{ monitor.last_checked_time|date:"M d, Y H:i" }}
+                        {% else %}
+                            <span class="text-muted">Never</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Last Found:</strong>
+                        {% if monitor.last_found_time %}
+                            {{ monitor.last_found_time|date:"M d, Y H:i" }}
+                        {% else %}
+                            <span class="text-muted">Never</span>
+                        {% endif %}
+                    </p>
+                    <div class="alert alert-info alert-sm mb-3">
+                        <small>
+                            Alerts: 
+                            {% if monitor.alert_email %}<i class="bi bi-envelope"></i> Email{% endif %}
+                            {% if monitor.alert_sms %}<i class="bi bi-chat"></i> SMS{% endif %}
+                            {% if not monitor.alert_email and not monitor.alert_sms %}<span class="text-muted">None</span>{% endif %}
+                        </small>
+                    </div>
+                    {% if monitor.notes %}
+                    <p><strong>Notes:</strong> {{ monitor.notes|truncatewords:20 }}</p>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-light">
+                    <a href="{% url 'web_monitoring:monitor_detail' monitor.id %}" class="btn btn-sm btn-secondary">
+                        <i class="bi bi-eye"></i> View
+                    </a>
+                    <a href="{% url 'web_monitoring:monitor_update' monitor.id %}" class="btn btn-sm btn-warning">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    <a href="{% url 'web_monitoring:monitor_delete' monitor.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this monitor?');">
+                        <i class="bi bi-trash"></i> Delete
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        <i class="bi bi-info-circle"></i> You haven't created any monitors yet.
+        <a href="{% url 'web_monitoring:monitor_create' %}" class="alert-link">Create one now</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

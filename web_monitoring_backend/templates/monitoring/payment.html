@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment - SelfErase{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-8">
+            <h1><i class="bi bi-credit-card"></i> Payment Details</h1>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger">
+        <strong>Error:</strong> {{ error }}
+    </div>
+    {% else %}
+
+    <div class="row">
+        <!-- Order Summary -->
+        <div class="col-md-5 mb-4">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    {% if subscription %}
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Subscription</h6>
+                        <p class="mb-1"><strong>{{ subscription.keyword }}</strong></p>
+                        <small class="text-muted">
+                            {% if subscription.cost_per_month == 1 %}
+                            Standard Plan
+                            {% elif subscription.cost_per_month == 5 %}
+                            Discovery Plan
+                            {% else %}
+                            Custom Plan
+                            {% endif %}
+                        </small>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Billing Period:</span>
+                        <strong>Monthly</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Amount:</span>
+                        <strong>${{ subscription.cost_per_month }}</strong>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+                        <h6>Total Due:</h6>
+                        <h5 class="text-primary mb-0">${{ subscription.cost_per_month }}</h5>
+                    </div>
+
+                    <p class="text-muted small mt-3 mb-0">
+                        <i class="bi bi-shield-check"></i> Secure and encrypted payment
+                    </p>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        Subscription details not available
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Form -->
+        <div class="col-md-7 mb-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Card Details</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="payment-form">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="cardholder-name" class="form-label">Cardholder Name</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="cardholder-name"
+                                placeholder="John Doe"
+                                required
+                            >
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cardholder-email" class="form-label">Email</label>
+                            <input 
+                                type="email" 
+                                class="form-control" 
+                                id="cardholder-email"
+                                value="{{ user.email }}"
+                                placeholder="email@example.com"
+                                required
+                            >
+                        </div>
+
+                        <!-- Stripe Card Element -->
+                        <div class="mb-3">
+                            <label class="form-label">Card Information</label>
+                            <div id="card-element" class="form-control p-2" style="height: 40px; padding-top: 10px !important;"></div>
+                            <small id="card-errors" class="text-danger mt-2 d-block"></small>
+                        </div>
+
+                        <!-- Billing Address -->
+                        <h6 class="mb-3">Billing Address</h6>
+
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Street Address</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="address"
+                                placeholder="123 Main St"
+                                required
+                            >
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="city" class="form-label">City</label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="city"
+                                    placeholder="New York"
+                                    required
+                                >
+                            </div>
+                            <div class="col-md-3">
+                                <label for="state" class="form-label">State</label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="state"
+                                    placeholder="NY"
+                                    required
+                                >
+                            </div>
+                            <div class="col-md-3">
+                                <label for="zip" class="form-label">ZIP</label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="zip"
+                                    placeholder="10001"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="country" class="form-label">Country</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="country"
+                                placeholder="United States"
+                                required
+                            >
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
+                                <i class="bi bi-lock"></i> Pay ${{ subscription.cost_per_month }}
+                            </button>
+                        </div>
+
+                        <a href="{% url 'web_monitoring:subscriptions' %}" class="btn btn-light w-100 mt-2">
+                            Cancel
+                        </a>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Test Info -->
+            <div class="alert alert-info mt-3">
+                <strong><i class="bi bi-info-circle"></i> Test Card (Demo):</strong>
+                <ul class="mb-0 mt-2">
+                    <li><strong>Number:</strong> 4242 4242 4242 4242</li>
+                    <li><strong>Expiry:</strong> 12/25</li>
+                    <li><strong>CVC:</strong> 123</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    // Initialize Stripe
+    const stripe = Stripe('{{ stripe_public_key }}');
+    const elements = stripe.elements();
+    const cardElement = elements.create('card', {
+        style: {
+            base: {
+                fontSize: '16px',
+                color: '#424242',
+                '::placeholder': {
+                    color: '#aab7c4',
+                },
+            },
+            invalid: {
+                color: '#dc3545',
+            },
+        }
+    });
+    
+    cardElement.mount('#card-element');
+    
+    // Handle real-time validation errors
+    cardElement.on('change', function(event) {
+        const displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+    
+    // Handle form submission
+    const form = document.getElementById('payment-form');
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+        
+        // Create token
+        const {token} = await stripe.createToken(cardElement);
+        
+        if (token) {
+            // Add token to form
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'stripeToken';
+            input.value = token.id;
+            form.appendChild(input);
+            
+            // Submit form
+            form.submit();
+        } else {
+            document.getElementById('card-errors').textContent = 'Unable to create payment token';
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="bi bi-lock"></i> Pay ${{ subscription.cost_per_month }}';
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Select Subscription Plan{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Step Indicator -->
+            <div class="card mb-4 bg-light">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="step-item completed">
+                                <div class="step-number">1</div>
+                                <div class="step-label">Create Monitor</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="step-item active">
+                                <div class="step-number">2</div>
+                                <div class="step-label">Select Plan</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="step-item">
+                                <div class="step-number">3</div>
+                                <div class="step-label">Payment</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% else %}
+                <!-- Monitor Details -->
+                {% if monitor %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Monitor Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>URL:</strong> {{ monitor.url }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Keyword:</strong> <span class="badge badge-info">{{ monitor.keyword }}</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Check Interval:</strong> Every {{ monitor.check_interval_days }} day{{ monitor.check_interval_days|pluralize }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Email Alerts:</strong> {% if monitor.alert_email %}<span class="badge badge-success">Enabled</span>{% else %}<span class="badge badge-secondary">Disabled</span>{% endif %}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Plan Selection -->
+                <h3 class="mb-4">Choose Your Subscription Plan</h3>
+                
+                <form method="POST" class="plan-selection-form">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        {% for plan in plans %}
+                            <div class="col-md-6 mb-4">
+                                <div class="card plan-card {% if plan.recommended %}border-primary recommended{% endif %} h-100">
+                                    {% if plan.recommended %}
+                                        <div class="badge badge-primary position-absolute" style="top: 10px; right: 10px;">Recommended</div>
+                                    {% endif %}
+                                    
+                                    <div class="card-header bg-{% if plan.recommended %}primary text-white{% else %}light{% endif %}">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="mb-0"><i class="fas {{ plan.icon }}"></i> {{ plan.name }}</h5>
+                                                <p class="mb-0 small text-muted">{{ plan.description }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card-body">
+                                        <!-- Price -->
+                                        <div class="price-section mb-4 text-center">
+                                            <div class="display-4 font-weight-bold">${{ plan.price|floatformat:2 }}</div>
+                                            <p class="text-muted mb-0">{{ plan.billing_period }}</p>
+                                        </div>
+                                        
+                                        <!-- Features -->
+                                        <ul class="list-unstyled mb-4">
+                                            {% for feature in plan.features %}
+                                                <li class="mb-2">
+                                                    <i class="fas fa-check text-success mr-2"></i>{{ feature }}
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                        
+                                        <!-- Selection Radio -->
+                                        <div class="custom-control custom-radio">
+                                            <input 
+                                                type="radio" 
+                                                id="plan_{{ plan.plan_id }}" 
+                                                name="plan" 
+                                                value="{{ plan.plan_id }}" 
+                                                class="custom-control-input"
+                                                {% if plan.recommended %}checked{% endif %}
+                                            >
+                                            <label class="custom-control-label w-100" for="plan_{{ plan.plan_id }}">
+                                                <strong>Select {{ plan.name }} Plan</strong>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card-footer bg-white">
+                                        <small class="text-muted">
+                                            {% if plan.plan_id == 'standard' %}
+                                                Perfect for basic keyword monitoring
+                                            {% else %}
+                                                Advanced features for power users
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-5 d-flex justify-content-between">
+                        <a href="{% url 'web_monitoring:monitor_list' %}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-arrow-left"></i> Back to Monitors
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg" id="continueBtn">
+                            Continue to Payment <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .step-item {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .step-number {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        color: #666;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .step-item.active .step-number {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .step-item.completed .step-number {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .step-label {
+        font-weight: 500;
+        color: #666;
+    }
+
+    .plan-card {
+        transition: all 0.3s ease;
+        border: 2px solid #e9ecef;
+    }
+
+    .plan-card:hover {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        transform: translateY(-5px);
+    }
+
+    .plan-card.recommended {
+        border-color: #007bff;
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+    }
+
+    .price-section {
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 20px;
+    }
+
+    .custom-control-label {
+        cursor: pointer;
+        padding-left: 0.5rem;
+    }
+
+    .btn-lg {
+        padding: 12px 30px;
+        font-size: 1.1rem;
+    }
+</style>
+{% endblock %}

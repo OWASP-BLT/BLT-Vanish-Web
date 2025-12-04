@@ -1,0 +1,25 @@
+{% autoescape off %}
+Hi {{ user.first_name|default:user.username }},
+
+A monitoring check has failed. Please review the details below.
+
+CHECK DETAILS:
+--------------
+Keyword: {{ keyword }}
+URL: {{ url }}
+Failed At: {{ failed_at|date:"M d, Y H:i" }}
+
+ERROR MESSAGE:
+{{ error_message }}
+
+NEXT STEPS:
+1. Log in to your SelfErase dashboard
+2. Review the error details
+3. Check if the URL is accessible
+4. Verify the monitoring settings
+
+If the issue persists, please contact support.
+
+Best regards,
+SelfErase Monitoring Team
+{% endautoescape %}

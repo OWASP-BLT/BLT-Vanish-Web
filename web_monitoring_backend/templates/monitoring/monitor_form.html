@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if monitor %}Edit{% else %}Create{% endif %} Monitor - SelfErase{% endblock %}
+
+{% block content %}
+<div class="container-lg">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>{% if monitor %}<i class="bi bi-pencil"></i> Edit Monitor{% else %}<i class="bi bi-plus-circle"></i> Create New Monitor{% endif %}</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.url.id_for_label }}" class="form-label">{{ form.url.label }}</label>
+                            {{ form.url }}
+                            {% if form.url.errors %}
+                            <div class="invalid-feedback d-block">{{ form.url.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">Enter the full URL including https://</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.keyword.id_for_label }}" class="form-label">{{ form.keyword.label }}</label>
+                            {{ form.keyword }}
+                            {% if form.keyword.errors %}
+                            <div class="invalid-feedback d-block">{{ form.keyword.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">Case-insensitive search</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.check_interval_days.id_for_label }}" class="form-label">{{ form.check_interval_days.label }}</label>
+                            {{ form.check_interval_days }}
+                            {% if form.check_interval_days.errors %}
+                            <div class="invalid-feedback d-block">{{ form.check_interval_days.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">How often to check (in days)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.alert_email }}
+                                <label class="form-check-label" for="{{ form.alert_email.id_for_label }}">
+                                    {{ form.alert_email.label }}
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.alert_sms }}
+                                <label class="form-check-label" for="{{ form.alert_sms.id_for_label }}">
+                                    {{ form.alert_sms.label }}
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label">{{ form.notes.label }}</label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                            <div class="invalid-feedback d-block">{{ form.notes.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg"></i> Save Monitor
+                            </button>
+                            <a href="{% url 'web_monitoring:monitor_list' %}" class="btn btn-secondary">
+                                <i class="bi bi-x-lg"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Help</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Monitor Setup</h6>
+                    <p><small>Create a monitor to track when a specific keyword appears on a webpage.</small></p>
+                    
+                    <h6 class="mt-3">Best Practices</h6>
+                    <ul class="small">
+                        <li>Use specific keywords to reduce false positives</li>
+                        <li>Set check intervals based on how often content changes</li>
+                        <li>Enable alerts to be notified immediately</li>
+                        <li>Check your spam folder for email alerts</li>
+                    </ul>
+                    
+                    <h6 class="mt-3">Pricing</h6>
+                    <p><small>Each monitor costs $1/month. First monitor is free during trial.</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

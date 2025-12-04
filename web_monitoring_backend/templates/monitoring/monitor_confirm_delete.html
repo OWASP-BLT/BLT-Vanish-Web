@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Monitor - SelfErase{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger mt-5">
+                <div class="card-header bg-danger text-white">
+                    <i class="bi bi-exclamation-triangle"></i> Confirm Deletion
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">
+                        Are you sure you want to delete this monitor?
+                    </p>
+                    <p class="text-muted">
+                        <strong>URL:</strong> {{ object.url }}<br>
+                        <strong>Keyword:</strong> {{ object.keyword }}<br>
+                        <strong>Check Interval:</strong> Every {{ object.check_interval_days }} day(s)
+                    </p>
+                    <p class="alert alert-warning">
+                        <i class="bi bi-exclamation-circle"></i>
+                        All check history will be permanently deleted. This action cannot be undone.
+                    </p>
+
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Delete Monitor
+                        </button>
+                        <a href="{% url 'web_monitoring:monitor_list' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

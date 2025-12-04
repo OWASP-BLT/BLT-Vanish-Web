@@ -1,0 +1,24 @@
+{% autoescape off %}
+Hi {{ user.first_name|default:user.username }},
+
+Your SelfErase subscription is expiring soon. Renew now to maintain monitoring.
+
+SUBSCRIPTION DETAILS:
+---------------------
+Keyword: {{ keyword }}
+Expires At: {{ expires_at|date:"M d, Y H:i" }}
+Days Remaining: {{ days_remaining }}
+
+RENEW YOUR SUBSCRIPTION:
+Your subscription will expire in {{ days_remaining }} days. Renew now to ensure continuous monitoring of your keyword.
+
+NEXT STEPS:
+1. Log in to your SelfErase dashboard
+2. Navigate to Subscriptions
+3. Click Renew on this subscription
+
+If you have questions or need assistance, please contact support.
+
+Best regards,
+SelfErase Monitoring Team
+{% endautoescape %}

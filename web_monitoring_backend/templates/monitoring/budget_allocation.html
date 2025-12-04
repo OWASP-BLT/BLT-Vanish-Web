@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Fund Allocation - SelfErase{% endblock %}
+
+{% block content %}
+<div class="container-lg">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1><i class="bi bi-pie-chart"></i> Fund Allocation Transparency</h1>
+            <p class="text-muted">Where your subscription fees go</p>
+        </div>
+    </div>
+
+    {% if budget_allocation %}
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Monthly Allocation Breakdown - {{ budget_allocation.month|date:"F Y" }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center mb-4">
+                        <div class="col-md-12">
+                            <h3>Total Revenue: ${{ budget_allocation.total_revenue }}</h3>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>Infrastructure & Hosting</h6>
+                                    <h4 class="text-primary">${{ budget_allocation.infrastructure_amount|floatformat:2 }}</h4>
+                                    <small class="text-muted">{{ budget_allocation.infrastructure_percent }}%</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>Development & Operations</h6>
+                                    <h4 class="text-primary">${{ budget_allocation.development_amount|floatformat:2 }}</h4>
+                                    <small class="text-muted">{{ budget_allocation.development_percent }}%</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>Privacy Research</h6>
+                                    <h4 class="text-primary">${{ budget_allocation.privacy_research_amount|floatformat:2 }}</h4>
+                                    <small class="text-muted">{{ budget_allocation.privacy_research_percent }}%</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>Legal & Compliance</h6>
+                                    <h4 class="text-primary">${{ budget_allocation.legal_amount|floatformat:2 }}</h4>
+                                    <small class="text-muted">{{ budget_allocation.legal_percent }}%</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>Reserve Fund</h6>
+                                    <h4 class="text-primary">${{ budget_allocation.reserve_amount|floatformat:2 }}</h4>
+                                    <small class="text-muted">{{ budget_allocation.reserve_percent }}%</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Your Contribution</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Total Paid:</strong></p>
+                    <h2 class="text-success mb-3">${{ user_total_paid|floatformat:2 }}</h2>
+                    
+                    <p class="text-muted">Your contribution helps fund:</p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-server"></i> Server infrastructure</li>
+                        <li><i class="bi bi-code-square"></i> Feature development</li>
+                        <li><i class="bi bi-shield-check"></i> Privacy research</li>
+                        <li><i class="bi bi-briefcase"></i> Legal protection</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Transparency Promise</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small">SelfErase publishes monthly financial reports showing how all subscription revenue is allocated. We believe in complete transparency about where your money goes.</p>
+                    <a href="#" class="btn btn-sm btn-outline-primary">View Full Reports</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        <i class="bi bi-info-circle"></i> Fund allocation data will be available once the first month of subscriptions is complete.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #dc3545; color: white; padding: 20px; border-radius: 5px; text-align: center; }
+        .content { background-color: #f9f9f9; padding: 20px; margin: 20px 0; border-radius: 5px; }
+        .details { background-color: white; padding: 15px; border-left: 4px solid #dc3545; margin: 15px 0; }
+        .detail-row { margin: 10px 0; }
+        .detail-label { font-weight: bold; color: #dc3545; }
+        .error-box { background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 15px 0; color: #721c24; }
+        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; }
+        .btn { display: inline-block; background-color: #dc3545; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚠️ Monitoring Check Failed</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hi {{ user.first_name|default:user.username }},</p>
+            <p>A monitoring check has failed. Please review the details below.</p>
+            
+            <div class="details">
+                <div class="detail-row">
+                    <span class="detail-label">Keyword:</span> {{ keyword }}
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">URL:</span> <a href="{{ url }}" target="_blank">{{ url }}</a>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Failed At:</span> {{ failed_at|date:"M d, Y H:i" }}
+                </div>
+            </div>
+            
+            <h3>Error Details:</h3>
+            <div class="error-box">
+                {{ error_message }}
+            </div>
+            
+            <h3>Troubleshooting Steps:</h3>
+            <ol>
+                <li>Verify that the URL is accessible and responds correctly</li>
+                <li>Check your monitoring settings for this URL</li>
+                <li>Review firewall or access restrictions</li>
+                <li>Ensure the website hasn't changed its structure</li>
+            </ol>
+            
+            <p style="text-align: center;">
+                <a href="http://127.0.0.1:8000/monitoring/" class="btn">View Dashboard</a>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 SelfErase Monitoring. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment History - SelfErase{% endblock %}
+
+{% block content %}
+<div class="container-lg">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="bi bi-receipt"></i> Payment History</h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'web_monitoring:subscriptions' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Subscriptions
+            </a>
+        </div>
+    </div>
+
+    {% if payments %}
+    <!-- Summary Card -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Total Payments</h6>
+                            <h3>${{ total_paid|default:"0.00" }}</h3>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Transactions</h6>
+                            <h3>{{ payments|length }}</h3>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Status</h6>
+                            <h3><span class="badge bg-success">Active</span></h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payments Table -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Status</th>
+                            <th>Transaction ID</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr>
+                            <td>
+                                <small>{{ payment.created_at|date:"M d, Y H:i" }}</small>
+                            </td>
+                            <td>
+                                {% if payment.payment_type == 'subscription' %}
+                                <span class="badge bg-info">Subscription</span>
+                                {% elif payment.payment_type == 'discovery' %}
+                                <span class="badge bg-warning text-dark">Discovery</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ payment.get_payment_type_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td><strong>${{ payment.amount }}</strong></td>
+                            <td>
+                                {% if payment.payment_method == 'stripe' %}
+                                <span class="badge bg-primary">Stripe</span>
+                                {% elif payment.payment_method == 'paypal' %}
+                                <span class="badge bg-light text-dark">PayPal</span>
+                                {% else %}
+                                {{ payment.get_payment_method_display }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if payment.status == 'completed' %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle"></i> Completed
+                                </span>
+                                {% elif payment.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-hourglass"></i> Pending
+                                </span>
+                                {% elif payment.status == 'failed' %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-x-circle"></i> Failed
+                                </span>
+                                {% elif payment.status == 'refunded' %}
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Refunded
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <code class="small">{{ payment.transaction_id|truncatewords:2 }}</code>
+                            </td>
+                            <td>
+                                {% if payment.subscription %}
+                                <small class="text-muted">
+                                    {{ payment.subscription.keyword }}
+                                </small>
+                                {% elif payment.description %}
+                                <small class="text-muted">
+                                    {{ payment.description|truncatewords:5 }}
+                                </small>
+                                {% else %}
+                                <small class="text-muted">—</small>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        <i class="bi bi-info-circle"></i> No payment history yet.
+        <a href="{% url 'web_monitoring:subscription_create' %}" class="alert-link">Create a subscription to make your first payment</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

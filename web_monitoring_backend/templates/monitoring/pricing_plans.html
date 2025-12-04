@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}Pricing Plans - SelfErase{% endblock %}
+
+{% block content %}
+<div class="container-lg">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-md-12 text-center">
+            <h1><i class="bi bi-credit-card"></i> Pricing Plans</h1>
+            <p class="lead text-muted">Choose the perfect plan for your monitoring needs</p>
+        </div>
+    </div>
+
+    <!-- Pricing Cards -->
+    <div class="row mb-5">
+        {% for plan in plans %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 {% if plan.plan_type == 'discovery' %}border-primary shadow-lg{% endif %}">
+                {% if plan.plan_type == 'discovery' %}
+                <div class="card-header bg-primary text-white">
+                    <span class="badge bg-warning text-dark float-end">POPULAR</span>
+                    <h5 class="mb-0">{{ plan.name }}</h5>
+                </div>
+                {% else %}
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">{{ plan.name }}</h5>
+                </div>
+                {% endif %}
+                
+                <div class="card-body d-flex flex-column">
+                    <!-- Price -->
+                    <div class="mb-4">
+                        <div class="display-4 text-primary">
+                            ${{ plan.price }}<span class="fs-6 text-muted">/{{ plan.billing_period }}</span>
+                        </div>
+                        <p class="text-muted mb-0">{{ plan.description }}</p>
+                    </div>
+
+                    <!-- Features -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3">Features:</h6>
+                        <ul class="list-unstyled">
+                            {% for feature in plan.features %}
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success"></i>
+                                <span class="ms-2">{{ feature }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Button -->
+                    <div class="mt-auto">
+                        {% if plan.plan_type == 'standard' %}
+                        <a href="{% url 'web_monitoring:subscription_create' %}" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-plus-circle"></i> Choose Plan
+                        </a>
+                        {% else %}
+                        <button class="btn btn-primary w-100" data-plan="{{ plan.plan_type }}">
+                            <i class="bi bi-star"></i> Get Started
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Features Comparison -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <h3 class="mb-4">Detailed Comparison</h3>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Feature</th>
+                            <th class="text-center">Standard ($1/month)</th>
+                            <th class="text-center">Discovery ($5/month)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Keywords to Monitor</td>
+                            <td class="text-center"><span class="badge bg-success">1 Keyword</span></td>
+                            <td class="text-center"><span class="badge bg-success">Unlimited</span></td>
+                        </tr>
+                        <tr>
+                            <td>Check Frequency</td>
+                            <td class="text-center"><i class="bi bi-check-circle text-success"></i> Daily</td>
+                            <td class="text-center"><i class="bi bi-check-circle text-success"></i> Real-time</td>
+                        </tr>
+                        <tr>
+                            <td>Email Alerts</td>
+                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>SMS Alerts</td>
+                            <td class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
+                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>Check History</td>
+                            <td class="text-center"><span class="badge bg-info">30 days</span></td>
+                            <td class="text-center"><span class="badge bg-info">Unlimited</span></td>
+                        </tr>
+                        <tr>
+                            <td>Keyword Discovery (AI)</td>
+                            <td class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
+                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>Advanced Analytics</td>
+                            <td class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
+                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>API Access</td>
+                            <td class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
+                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>Support</td>
+                            <td class="text-center"><span class="badge bg-secondary">Standard</span></td>
+                            <td class="text-center"><span class="badge bg-warning text-dark">Priority</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="row mb-5">
+        <div class="col-md-8 offset-md-2">
+            <h3 class="mb-4">Frequently Asked Questions</h3>
+            <div class="accordion" id="faqAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                            Can I cancel my subscription anytime?
+                        </button>
+                    </h2>
+                    <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Yes! You can pause or cancel your subscription anytime. No long-term contracts required.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                            Do you offer refunds?
+                        </button>
+                    </h2>
+                    <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            We offer a 7-day money-back guarantee for new subscriptions. Contact support for details.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                            Can I upgrade or downgrade my plan?
+                        </button>
+                    </h2>
+                    <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Absolutely! You can upgrade or downgrade anytime. We'll prorate the charges.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                            What payment methods do you accept?
+                        </button>
+                    </h2>
+                    <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            We accept all major credit cards, PayPal, and bank transfers through Stripe and PayPal.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                            Is there a free trial?
+                        </button>
+                    </h2>
+                    <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Yes! Get 14 days free when you sign up. No credit card required to start.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center py-5">
+                    <h4>Ready to start monitoring?</h4>
+                    <p class="mb-4">Join thousands of users protecting their data with SelfErase</p>
+                    <a href="{% url 'web_monitoring:subscription_create' %}" class="btn btn-light btn-lg">
+                        <i class="bi bi-play-circle"></i> Get Started Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% autoescape off %}
+Hi {{ user.first_name|default:user.username }},
+
+Great news! Your monitored keyword has been found.
+
+DETECTION DETAILS:
+------------------
+Keyword: {{ keyword }}
+URL: {{ url }}
+Found At: {{ found_at|date:"M d, Y H:i" }}
+Page Title: {{ page_title }}
+HTTP Status: {{ http_status }}
+Response Time: {{ response_time_ms }}ms
+
+PAGE EXCERPT:
+{{ page_excerpt }}
+
+NEXT STEPS:
+1. Log in to your SelfErase dashboard
+2. Review the complete check results
+3. Take any necessary actions
+
+If you have questions or need assistance, please contact support.
+
+Best regards,
+SelfErase Monitoring Team
+{% endautoescape %}

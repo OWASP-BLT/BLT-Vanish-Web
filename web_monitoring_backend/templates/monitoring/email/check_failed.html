@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #d32f2f; color: white; padding: 20px; }
+        .content { padding: 20px; background-color: #f8f9fa; }
+        .footer { background-color: #212529; color: white; padding: 20px; text-align: center; font-size: 12px; }
+        .alert { background-color: #ffcdd2; border: 1px solid #d32f2f; padding: 15px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Monitor Check Failed</h2>
+        </div>
+
+        <div class="content">
+            <p>Hello {{ user.first_name|default:user.username }},</p>
+
+            <div class="alert">
+                <strong>We couldn't check <em>{{ url }}</em> for your keyword</strong>
+            </div>
+
+            <h3>Error Details</h3>
+            <p><strong>Keyword:</strong> {{ keyword }}</p>
+            <p><strong>URL:</strong> <a href="{{ url }}">{{ url }}</a></p>
+            <p><strong>Error Message:</strong></p>
+            <pre style="background: white; padding: 10px; border-left: 4px solid #d32f2f;">{{ error }}</pre>
+
+            <h3>What we'll do</h3>
+            <p>We'll keep trying to check this monitor. We'll notify you once it's working again.</p>
+
+            <h3>Action Required?</h3>
+            <p>
+                <a href="https://monitoring.selferase.io/monitors" style="background-color: #d32f2f; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;">
+                    Review Monitor
+                </a>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 SelfErase Web Monitoring System | AGPL-3.0 Licensed</p>
+        </div>
+    </div>
+</body>
+</html>

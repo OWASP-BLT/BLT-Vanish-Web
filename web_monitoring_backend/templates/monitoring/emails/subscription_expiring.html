@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #ffc107; color: #333; padding: 20px; border-radius: 5px; text-align: center; }
+        .content { background-color: #f9f9f9; padding: 20px; margin: 20px 0; border-radius: 5px; }
+        .details { background-color: white; padding: 15px; border-left: 4px solid #ffc107; margin: 15px 0; }
+        .detail-row { margin: 10px 0; }
+        .detail-label { font-weight: bold; color: #ffc107; }
+        .warning-box { background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; color: #856404; }
+        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; }
+        .btn { display: inline-block; background-color: #ffc107; color: #333; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 15px 0; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⏰ Subscription Expiring Soon</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hi {{ user.first_name|default:user.username }},</p>
+            <p>Your SelfErase subscription is expiring soon. Renew now to maintain continuous monitoring.</p>
+            
+            <div class="details">
+                <div class="detail-row">
+                    <span class="detail-label">Keyword:</span> {{ keyword }}
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Expires At:</span> {{ expires_at|date:"M d, Y H:i" }}
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Days Remaining:</span> <strong>{{ days_remaining }} days</strong>
+                </div>
+            </div>
+            
+            <div class="warning-box">
+                <strong>⚠️ Important:</strong> Your subscription will expire in {{ days_remaining }} days. 
+                After expiration, keyword monitoring will stop unless you renew.
+            </div>
+            
+            <h3>Why Renew?</h3>
+            <ul>
+                <li>Continuous monitoring of your keywords</li>
+                <li>Immediate email alerts when keywords are found</li>
+                <li>Access to detailed check history and analytics</li>
+                <li>No data loss - your monitoring history is preserved</li>
+            </ul>
+            
+            <p style="text-align: center;">
+                <a href="http://127.0.0.1:8000/monitoring/subscriptions/" class="btn">Renew Subscription</a>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 SelfErase Monitoring. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
