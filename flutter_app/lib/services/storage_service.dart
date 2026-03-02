@@ -135,6 +135,23 @@ class StorageService {
     _initialized = false;
   }
 
+  /// Export data as a plain, human-readable JSON string (unencrypted).
+  /// Use this for user-facing "Download Profile" functionality.
+  Future<String> exportDataAsJson() async {
+    final userData = await getUserData();
+    final requests = await getRequests();
+
+    final data = {
+      'version': '1.0',
+      'exportedAt': DateTime.now().toIso8601String(),
+      'userData': userData?.toJson(),
+      'requests': requests.map((r) => r.toJson()).toList(),
+    };
+
+    const encoder = JsonEncoder.withIndent('  ');
+    return encoder.convert(data);
+  }
+
   /// Export data as encrypted ZIP-compatible JSON
   Future<String> exportData() async {
     final userData = await getUserData();
