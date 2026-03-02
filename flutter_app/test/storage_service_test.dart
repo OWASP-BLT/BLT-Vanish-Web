@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:selferase/services/storage_service.dart';
 import 'package:selferase/models/user_data.dart';
@@ -86,6 +88,36 @@ void main() {
       expect(imported, isNotNull);
       expect(imported?.firstName, equals('Export'));
       expect(imported?.lastName, equals('Test'));
+    });
+
+    test('should export data as plain JSON', () async {
+      // Arrange
+      await storageService.initialize();
+
+      final userData = UserData(
+        id: const Uuid().v4(),
+        firstName: 'Download',
+        lastName: 'Test',
+        emails: ['download@example.com'],
+        phoneNumbers: [],
+        addresses: [],
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await storageService.saveUserData(userData);
+
+      // Act
+      final jsonContent = await storageService.exportDataAsJson();
+
+      // Assert - result is valid, human-readable JSON
+      expect(jsonContent, isNotEmpty);
+      final decoded = jsonDecode(jsonContent) as Map<String, dynamic>;
+      expect(decoded['version'], equals('1.0'));
+      expect(decoded['exportedAt'], isNotNull);
+      expect(decoded['userData'], isNotNull);
+      expect(decoded['userData']['firstName'], equals('Download'));
+      expect(decoded['userData']['lastName'], equals('Test'));
     });
 
     test('should maintain data integrity across operations', () async {

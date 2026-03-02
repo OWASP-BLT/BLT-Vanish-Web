@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../services/storage_service.dart';
 import '../models/user_data.dart';
+import '../utils/download_helper.dart';
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback onProfileUpdated;
@@ -132,6 +133,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to save profile: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _downloadProfile() async {
+    try {
+      final storageService = context.read<StorageService>();
+      final jsonContent = await storageService.exportDataAsJson();
+      final savedPath = await downloadFile(jsonContent, 'profile_export.json');
+
+      if (!mounted) return;
+
+      final message = savedPath != null
+          ? 'Profile saved to $savedPath'
+          : 'Profile downloaded successfully';
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to download profile: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -291,6 +322,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
+        ),
+        const SizedBox(height: 16),
+        FilledButton.icon(
+          onPressed: _downloadProfile,
+          icon: const Icon(Icons.download),
+          label: const Text('Download Profile'),
         ),
       ],
     );
